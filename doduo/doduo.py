@@ -151,9 +151,12 @@ class Doduo:
             args = argparse.Namespace
 
         self.args = args
-        self.args.colpair = True
-        self.args.shortcut_name = "bert-base-uncased"
-        self.args.batch_size = 16
+        self.args.colpair = getattr(args, 'colpair', True)
+        self.args.shortcut_name = getattr(args, 'shortcut_name', "bert-base-uncased")
+        self.args.batch_size = getattr(args, 'batch_size', 16)
+        self.args.coltype_model = getattr(args, 'coltype_model', "model/turlturl-re-colpair_mosato_bert_bert-base-uncased-bs16-ml-16__turl-1.00_turl-re-1.00=turl_best_micro_f1.pt")
+        self.args.colrel_model = getattr(args, 'colrel_model', "model/turlturl-re-colpair_mosato_bert_bert-base-uncased-bs16-ml-16__turl-1.00_turl-re-1.00=turl-re_best_micro_f1.pt")
+
 
         ## Load models
         self.tokenizer = BertTokenizer.from_pretrained(self.args.shortcut_name)
@@ -161,17 +164,17 @@ class Doduo:
         if self.args.model == "viznet":
             coltype_model_path = os.path.join(
                 basedir,
-                "model/sato0_mosato_bert_bert-base-uncased-bs16-ml-32__sato0-1.00_best_micro_f1.pt"
+                self.args.coltype_model
             )
             coltype_num_labels = 78
         elif self.args.model == "wikitable":
             coltype_model_path = os.path.join(
                 basedir,
-                "model/turlturl-re-colpair_mosato_bert_bert-base-uncased-bs16-ml-16__turl-1.00_turl-re-1.00=turl_best_micro_f1.pt"
+                self.args.coltype_model
             )
             colrel_model_path = os.path.join(
                 basedir,
-                "model/turlturl-re-colpair_mosato_bert_bert-base-uncased-bs16-ml-16__turl-1.00_turl-re-1.00=turl-re_best_micro_f1.pt"
+                self.args.colrel_model
             )
             coltype_num_labels = 255
             colrel_num_labels = 121

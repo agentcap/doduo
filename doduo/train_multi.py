@@ -28,6 +28,14 @@ from model import BertForMultiOutputClassification, BertMultiPairPooler
 from util import f1_score_multilabel
 
 
+#
+# from datetime import datetime
+# _print=print
+# def print(*args, **kw):
+#     _print("[%s]" % (datetime.now()),*args, **kw)
+
+from tqdm import tqdm
+
 def set_seed(seed):
     random.seed(seed)
     np.random.seed(seed)
@@ -36,6 +44,8 @@ def set_seed(seed):
 
 if __name__ == "__main__":
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+    print("Using device: " + 'cuda' if torch.cuda.is_available() else 'cpu')
 
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -95,7 +105,7 @@ if __name__ == "__main__":
     parser.add_argument("--tasks",
                         type=str,
                         nargs="+",
-                        default=["sato0"],
+                        default=["turl", "turl-re"],
                         choices=[
                             "sato0", "sato1", "sato2", "sato3", "sato4",
                             "msato0", "msato1", "msato2", "msato3", "msato4",
@@ -353,6 +363,7 @@ if __name__ == "__main__":
     schedulers = []
     loss_fns = []
     for i, train_dataloader in enumerate(train_dataloaders):
+        print("Length of train dataloader: " + str(len(train_dataloader)))
         t_total = len(train_dataloader) * num_train_epochs
         no_decay = ["bias", "LayerNorm.weight"]
         optimizer_grouped_parameters = [
@@ -411,7 +422,8 @@ if __name__ == "__main__":
             vl_pred_list = []
             vl_true_list = []
 
-            for batch_idx, batch in enumerate(train_dataloader):
+            print("Epoch: {}".format(epoch))
+            for batch_idx, batch in tqdm(enumerate(train_dataloader)):
                 if args.single_col:
                     logits = model(batch["data"].T).logits
                     if "sato" in task:
@@ -499,8 +511,9 @@ if __name__ == "__main__":
                     tr_true_list, tr_pred_list)
 
             # Validation
+            print("Validation:")
             model.eval()
-            for batch_idx, batch in enumerate(valid_dataloader):
+            for batch_idx, batch in tqdm(enumerate(valid_dataloader)):
                 if args.single_col:
                     # Single-column
                     logits = model(batch["data"].T).logits
